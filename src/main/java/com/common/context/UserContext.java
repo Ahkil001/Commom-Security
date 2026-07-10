@@ -6,22 +6,28 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class UserContext {
+public final class UserContext {
+	  private final UUID userId;
+	    private final String username;
+	    private final String email;
+	    private final List<String> roles;
+	    private final String active;
 
-    private UUID userId;
+	    private static final ThreadLocal<UserContext> CONTEXT = new ThreadLocal<>();
 
-    private String username;
+	    public static void setContext(UserContext context) {
+	        CONTEXT.set(context);
+	    }
 
-    private String email;
+	    public static UserContext getContext() {
+	        return CONTEXT.get();
+	    }
 
-    private List<String> roles;
-
+	    public static void clear() {
+	        CONTEXT.remove();
+	    }
 }

@@ -11,10 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.common.context.UserContext;
-import com.common.context.UserContextHolder;
 import com.common.exception.UnauthorizedException;
-import com.common.jwt.JwtConstants;
-import com.common.jwt.JwtValidator;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -50,18 +47,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			String token = header.substring(7);
 
 			Claims claims = jwtValidator.validate(token);
+			UserContext context = UserContext.builder().userId(UUID.fromString(claims.get("userId", String.class)))
+					.username(claims.getSubject()).email(claims.get("email", String.class))
+					.roles(claims.get("roles", List.class)).active(claims.get("active", String.class)).build();
 
-			UserContext context = new UserContext();
-
-			context.setUserId(UUID.fromString(claims.get("userId", String.class)));
-
-			context.setUsername(claims.getSubject());
-
-			context.setEmail(claims.get("email", String.class));
-
-			context.setRoles(claims.get("roles", List.class));
-
-			UserContextHolder.setContext(context);
+			UserContext.setContext(context);
 
 			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
 					context.getUsername(), null, Collections.emptyList());
@@ -76,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		} finally {
 
-			UserContextHolder.clear();
+			UserContext.clear();
 
 			SecurityContextHolder.clearContext();
 

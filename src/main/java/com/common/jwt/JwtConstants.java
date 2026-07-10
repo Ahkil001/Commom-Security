@@ -14,5 +14,6 @@ public final class JwtConstants {
 	public static final String EMAIL = "email";
 
 	public static final String ROLES = "roles";
+	public static final String ACTIVE = "active";
 
 }
