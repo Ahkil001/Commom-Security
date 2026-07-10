@@ -1,48 +1,33 @@
 package com.common.jwt;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.common.exception.UnauthorizedException;
-
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtValidator {
 
-	private final Key signingKey;
+	@Value("${jwt.secret}")
+	private String secret;
 
-	public JwtValidator(@Value("${jwt.secret}") String secret) {
-		this.signingKey = Keys.hmacShaKeyFor(secret.getBytes());
-	}
+	public Claims validate(String token) {
 
-	public boolean validateToken(String token) {
-
-		try {
-
-			Jwts.parser().verifyWith((javax.crypto.SecretKey) signingKey).build().parseSignedClaims(token);
-
-			return true;
-
-		} catch (ExpiredJwtException ex) {
-			throw new UnauthorizedException("Token has expired");
-
-		} catch (JwtException | IllegalArgumentException ex) {
-			throw new UnauthorizedException("Invalid JWT Token");
-		}
+		return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
 
 	}
 
-	public Claims getClaims(String token) {
+	private SecretKey getSigningKey() {
 
-		return Jwts.parser().verifyWith((javax.crypto.SecretKey) signingKey).build().parseSignedClaims(token)
-				.getPayload();
+		byte[] keyBytes = Decoders.BASE64.decode(secret);
+
+		return Keys.hmacShaKeyFor(keyBytes);
+
 	}
 
 }

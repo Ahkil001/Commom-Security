@@ -1,36 +1,44 @@
 package com.common.config;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.common.jwt.JwtAuthenticationFilter;
-import com.common.jwt.JwtValidator;
 
-@Configuration
-@EnableWebSecurity
+@AutoConfiguration
 public class SecurityConfiguration {
 
-	private final JwtValidator jwtValidator;
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-	public SecurityConfiguration(JwtValidator jwtValidator) {
-		this.jwtValidator = jwtValidator;
-	}
+	public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter) {
 
-	@Bean
-	JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(jwtValidator);
+		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+
 	}
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-				.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+		return http
 
-		return http.build();
+				.csrf(csrf -> csrf.disable())
+
+				.cors(Customizer.withDefaults())
+
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**")
+						.permitAll().anyRequest().authenticated())
+
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+				.build();
+
 	}
+
 }

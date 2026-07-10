@@ -2,15 +2,17 @@ package com.common.jwt;
 
 public final class JwtConstants {
 
-    private JwtConstants() {
-    }
+	private JwtConstants() {
+	}
 
-    public static final String AUTHORIZATION = "Authorization";
-    public static final String TOKEN_PREFIX = "Bearer ";
+	public static final String HEADER = "Authorization";
 
-    // JWT Claims
-    public static final String USER_ID = "userId";
-    public static final String CUSTOMER_ID = "customerId";
-    public static final String ROLE = "role";
-    public static final String USERNAME = "username";
+	public static final String PREFIX = "Bearer ";
+
+	public static final String USER_ID = "userId";
+
+	public static final String EMAIL = "email";
+
+	public static final String ROLES = "roles";
+
 }
